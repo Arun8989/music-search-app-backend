@@ -1,4 +1,5 @@
 import express from 'express'
+import requireAuth from '../middleware/authMiddleware.js'
 import {
   createPlaylist,
   getPlaylistById,
@@ -13,7 +14,7 @@ router.get('/', (_req, res) => {
   res.json({ success: true, data: getPlaylists() })
 })
 
-router.post('/', (req, res) => {
+router.post('/', requireAuth, (req, res) => {
   if (!req.body.name?.trim()) {
     return res.status(400).json({ success: false, message: 'Playlist name is required' })
   }
@@ -26,7 +27,7 @@ router.post('/', (req, res) => {
   return res.status(201).json({ success: true, data: playlist })
 })
 
-router.post('/:playlistId/tracks', (req, res) => {
+router.post('/:playlistId/tracks', requireAuth, (req, res) => {
   const playlist = getPlaylistById(req.params.playlistId)
   const track = getTrackById(req.body.trackId)
 
@@ -47,7 +48,7 @@ router.post('/:playlistId/tracks', (req, res) => {
   return res.json({ success: true, data: updatedPlaylist })
 })
 
-router.delete('/:playlistId/tracks/:trackId', (req, res) => {
+router.delete('/:playlistId/tracks/:trackId', requireAuth, (req, res) => {
   const playlist = getPlaylistById(req.params.playlistId)
   if (!playlist) {
     return res.status(404).json({ success: false, message: 'Playlist not found' })
@@ -62,7 +63,7 @@ router.delete('/:playlistId/tracks/:trackId', (req, res) => {
   return res.json({ success: true, data: updatedPlaylist })
 })
 
-router.post('/:playlistId/like', (req, res) => {
+router.post('/:playlistId/like', requireAuth, (req, res) => {
   const playlist = getPlaylistById(req.params.playlistId)
   if (!playlist) {
     return res.status(404).json({ success: false, message: 'Playlist not found' })

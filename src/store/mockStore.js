@@ -1,9 +1,18 @@
+import bcrypt from 'bcryptjs'
 import { genres, playlists, tracks } from '../data/seed.js'
 
 const state = {
   genres: [...genres],
   tracks: structuredClone(tracks),
   playlists: structuredClone(playlists),
+  users: [
+    {
+      _id: 'user-1',
+      name: 'Demo Listener',
+      email: 'demo@musicapp.com',
+      passwordHash: bcrypt.hashSync('demo1234', 10),
+    },
+  ],
 }
 
 export const getTracks = () => state.tracks
@@ -14,6 +23,9 @@ export const getGenres = () => state.genres
 export const getPlaylists = () => state.playlists
 export const getPlaylistById = (playlistId) =>
   state.playlists.find((playlist) => playlist._id === playlistId)
+export const getUserById = (userId) => state.users.find((user) => user._id === userId)
+export const getUserByEmail = (email) =>
+  state.users.find((user) => user.email.toLowerCase() === email.toLowerCase())
 
 export const saveTrack = (updatedTrack) => {
   state.tracks = state.tracks.map((track) => (track._id === updatedTrack._id ? updatedTrack : track))
@@ -39,4 +51,16 @@ export const createPlaylist = (payload) => {
 
   state.playlists.unshift(newPlaylist)
   return newPlaylist
+}
+
+export const createUser = ({ name, email, password }) => {
+  const newUser = {
+    _id: `user-${Date.now()}`,
+    name,
+    email,
+    passwordHash: bcrypt.hashSync(password, 10),
+  }
+
+  state.users.unshift(newUser)
+  return newUser
 }

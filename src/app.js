@@ -1,6 +1,7 @@
 import cors from 'cors'
 import dotenv from 'dotenv'
 import express from 'express'
+import authRoutes from './routes/authRoutes.js'
 import playlistRoutes from './routes/playlistRoutes.js'
 import trackRoutes from './routes/trackRoutes.js'
 import { getGenres } from './store/mockStore.js'
@@ -23,6 +24,7 @@ app.get('/api/health', (_req, res) => {
   })
 })
 
+app.use('/api/auth', authRoutes)
 app.use('/api/tracks', trackRoutes)
 app.use('/api/playlists', playlistRoutes)
 app.use('/api/genres', (_req, res) => {

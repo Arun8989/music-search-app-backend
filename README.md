@@ -18,6 +18,7 @@ https://music-search-app-backend.onrender.com/api
 - Playlist likes
 - Track comments
 - Genre endpoint
+- Register, login, and profile endpoints
 - MongoDB-ready configuration with seeded in-memory fallback
 
 ## Tech Stack
@@ -49,6 +50,7 @@ Create a `.env` file:
 PORT=5000
 CLIENT_URL=http://localhost:5173
 MONGO_URI=
+JWT_SECRET=change-me
 ```
 
 If `MONGO_URI` is empty, the API uses seeded in-memory data.
@@ -57,6 +59,9 @@ If `MONGO_URI` is empty, the API uses seeded in-memory data.
 
 ```text
 GET    /api/health
+POST   /api/auth/register
+POST   /api/auth/login
+GET    /api/auth/me
 GET    /api/genres
 GET    /api/tracks
 GET    /api/tracks?search=lofi
@@ -77,6 +82,14 @@ Use these settings:
 - Build command: `npm install`
 - Start command: `npm start`
 - Environment variable: `CLIENT_URL=<your Netlify frontend URL>`
+- Environment variable: `JWT_SECRET=<your secure random string>`
+
+## Demo Account
+
+```text
+Email: demo@musicapp.com
+Password: demo1234
+```
 
 ## Frontend Repository
 

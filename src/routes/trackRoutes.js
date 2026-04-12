@@ -1,4 +1,5 @@
 import express from 'express'
+import requireAuth from '../middleware/authMiddleware.js'
 import {
   getRecommendedTracks,
   getTrackById,
@@ -25,7 +26,7 @@ router.get('/recommended', (_req, res) => {
   res.json({ success: true, data: getRecommendedTracks() })
 })
 
-router.post('/:trackId/like', (req, res) => {
+router.post('/:trackId/like', requireAuth, (req, res) => {
   const track = getTrackById(req.params.trackId)
   if (!track) {
     return res.status(404).json({ success: false, message: 'Track not found' })
@@ -41,7 +42,7 @@ router.post('/:trackId/like', (req, res) => {
   return res.json({ success: true, data: updatedTrack })
 })
 
-router.post('/:trackId/comments', (req, res) => {
+router.post('/:trackId/comments', requireAuth, (req, res) => {
   const track = getTrackById(req.params.trackId)
   if (!track) {
     return res.status(404).json({ success: false, message: 'Track not found' })
@@ -53,7 +54,7 @@ router.post('/:trackId/comments', (req, res) => {
       ...track.comments,
       {
         _id: `comment-${Date.now()}`,
-        user: req.body.user || 'Anonymous',
+        user: req.user.name,
         content: req.body.content || '',
         createdAtLabel: 'Just now',
       },
