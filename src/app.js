@@ -3,6 +3,7 @@ import dotenv from 'dotenv'
 import express from 'express'
 import playlistRoutes from './routes/playlistRoutes.js'
 import trackRoutes from './routes/trackRoutes.js'
+import { getGenres } from './store/mockStore.js'
 
 dotenv.config()
 
@@ -25,7 +26,7 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/tracks', trackRoutes)
 app.use('/api/playlists', playlistRoutes)
 app.use('/api/genres', (_req, res) => {
-  res.json({ success: true, data: ['Lofi', 'Pop', 'Cinematic', 'Electronic', 'Indie'] })
+  res.json({ success: true, data: getGenres() })
 })
 
 export default app

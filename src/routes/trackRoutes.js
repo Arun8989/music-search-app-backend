@@ -13,7 +13,7 @@ router.get('/', (req, res) => {
   const tracks = getTracks().filter((track) => {
     if (!search) return true
 
-    return [track.title, track.artist, track.album, track.movie].some((value) =>
+    return [track.title, track.artist, track.album, track.movie, track.genre, track.mood].some((value) =>
       value.toLowerCase().includes(search),
     )
   })
