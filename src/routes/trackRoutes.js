@@ -1,5 +1,5 @@
 import express from 'express'
-import requireAuth from '../middleware/authMiddleware.js'
+import requireAuth, { attachOptionalUser } from '../middleware/authMiddleware.js'
 import {
   getRecommendedTracks,
   getTrackById,
@@ -9,9 +9,9 @@ import {
 
 const router = express.Router()
 
-router.get('/', (req, res) => {
+router.get('/', attachOptionalUser, (req, res) => {
   const search = (req.query.search || '').toLowerCase()
-  const tracks = getTracks().filter((track) => {
+  const tracks = getTracks(req.user?._id).filter((track) => {
     if (!search) return true
 
     return [track.title, track.artist, track.album, track.movie, track.genre, track.mood].some((value) =>
@@ -22,8 +22,8 @@ router.get('/', (req, res) => {
   res.json({ success: true, data: tracks })
 })
 
-router.get('/recommended', (_req, res) => {
-  res.json({ success: true, data: getRecommendedTracks() })
+router.get('/recommended', attachOptionalUser, (req, res) => {
+  res.json({ success: true, data: getRecommendedTracks(req.user?._id) })
 })
 
 router.post('/:trackId/like', requireAuth, (req, res) => {
@@ -34,9 +34,13 @@ router.post('/:trackId/like', requireAuth, (req, res) => {
 
   const updatedTrack = {
     ...track,
-    liked: !track.liked,
-    likes: track.liked ? track.likes - 1 : track.likes + 1,
+    likedBy: track.likedBy.includes(req.user._id)
+      ? track.likedBy.filter((userId) => userId !== req.user._id)
+      : [...track.likedBy, req.user._id],
   }
+
+  updatedTrack.likes = track.likedBy.includes(req.user._id) ? track.likes - 1 : track.likes + 1
+  updatedTrack.liked = updatedTrack.likedBy.includes(req.user._id)
 
   saveTrack(updatedTrack)
   return res.json({ success: true, data: updatedTrack })

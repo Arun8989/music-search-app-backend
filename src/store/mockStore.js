@@ -1,10 +1,28 @@
 import bcrypt from 'bcryptjs'
 import { genres, playlists, tracks } from '../data/seed.js'
 
+const serializeTrack = (track, userId) => ({
+  ...track,
+  liked: Boolean(userId && track.likedBy?.includes(userId)),
+})
+
+const serializePlaylist = (playlist, userId) => ({
+  ...playlist,
+  liked: Boolean(userId && playlist.likedBy?.includes(userId)),
+})
+
 const state = {
   genres: [...genres],
-  tracks: structuredClone(tracks),
-  playlists: structuredClone(playlists),
+  tracks: structuredClone(tracks).map((track) => ({
+    ...track,
+    likedBy: track.liked ? ['user-1'] : [],
+    liked: false,
+  })),
+  playlists: structuredClone(playlists).map((playlist) => ({
+    ...playlist,
+    likedBy: playlist.liked ? ['user-1'] : [],
+    liked: false,
+  })),
   users: [
     {
       _id: 'user-1',
@@ -15,12 +33,16 @@ const state = {
   ],
 }
 
-export const getTracks = () => state.tracks
+export const getTracks = (userId) => state.tracks.map((track) => serializeTrack(track, userId))
 export const getTrackById = (trackId) => state.tracks.find((track) => track._id === trackId)
-export const getRecommendedTracks = () =>
-  [...state.tracks].sort((a, b) => b.likes + b.streams - (a.likes + a.streams)).slice(0, 4)
+export const getRecommendedTracks = (userId) =>
+  [...state.tracks]
+    .sort((a, b) => b.likes + b.streams - (a.likes + a.streams))
+    .slice(0, 4)
+    .map((track) => serializeTrack(track, userId))
 export const getGenres = () => state.genres
-export const getPlaylists = () => state.playlists
+export const getPlaylists = (userId) =>
+  state.playlists.map((playlist) => serializePlaylist(playlist, userId))
 export const getPlaylistById = (playlistId) =>
   state.playlists.find((playlist) => playlist._id === playlistId)
 export const getUserById = (userId) => state.users.find((user) => user._id === userId)
@@ -47,6 +69,7 @@ export const createPlaylist = (payload) => {
     trackIds: [],
     likes: 0,
     liked: false,
+    likedBy: [],
   }
 
   state.playlists.unshift(newPlaylist)

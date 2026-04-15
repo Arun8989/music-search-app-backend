@@ -1,5 +1,5 @@
 import express from 'express'
-import requireAuth from '../middleware/authMiddleware.js'
+import requireAuth, { attachOptionalUser } from '../middleware/authMiddleware.js'
 import {
   createPlaylist,
   getPlaylistById,
@@ -10,8 +10,8 @@ import {
 
 const router = express.Router()
 
-router.get('/', (_req, res) => {
-  res.json({ success: true, data: getPlaylists() })
+router.get('/', attachOptionalUser, (req, res) => {
+  res.json({ success: true, data: getPlaylists(req.user?._id) })
 })
 
 router.post('/', requireAuth, (req, res) => {
@@ -71,9 +71,15 @@ router.post('/:playlistId/like', requireAuth, (req, res) => {
 
   const updatedPlaylist = {
     ...playlist,
-    liked: !playlist.liked,
-    likes: playlist.liked ? playlist.likes - 1 : playlist.likes + 1,
+    likedBy: playlist.likedBy.includes(req.user._id)
+      ? playlist.likedBy.filter((userId) => userId !== req.user._id)
+      : [...playlist.likedBy, req.user._id],
   }
+
+  updatedPlaylist.likes = playlist.likedBy.includes(req.user._id)
+    ? playlist.likes - 1
+    : playlist.likes + 1
+  updatedPlaylist.liked = updatedPlaylist.likedBy.includes(req.user._id)
 
   savePlaylist(updatedPlaylist)
   return res.json({ success: true, data: updatedPlaylist })
